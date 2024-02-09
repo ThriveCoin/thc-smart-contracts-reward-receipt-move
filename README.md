@@ -33,7 +33,7 @@ sui client envs # check if devnet is present
 sui client new-env --alias devnet --rpc https://fullnode.devnet.sui.io:443
 
 # switch to devnet
-sui client switch --env devne
+sui client switch --env devnet
 ```
 
 Then get the active address and send some funds to it via faucet:
@@ -58,7 +58,7 @@ sui client gas
 
 After this deploy the package:
 ```
-sui client publish --gas-budget <gas-limit>
+sui client publish --gas-budget <gas-limit> --json
 ```
 
 Upon deployment you can check your tx on explorer and get necessary object ids:
