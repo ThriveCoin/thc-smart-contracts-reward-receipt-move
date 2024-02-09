@@ -17,7 +17,6 @@ module thrivecoin::reward_receipt {
 
   struct WriterRole has key {
     id: UID,
-    admin: address,
     list: VecSet<address>
   }
 
@@ -47,15 +46,13 @@ module thrivecoin::reward_receipt {
 
     transfer::share_object(WriterRole {
       id: object::new(ctx),
-      admin: tx_context::sender(ctx),
       list: vec_set::singleton(tx_context::sender(ctx))
     });
   }
 
   // role functions
-  public fun transfer_admin_role (admin_role: AdminRole, writer_role: &mut WriterRole, new_owner: address) {
+  public fun transfer_admin_role (admin_role: AdminRole, new_owner: address) {
     transfer::transfer(admin_role, new_owner);
-    writer_role.admin = new_owner;
   }
 
   public fun add_writer (_: &AdminRole, writer_role: &mut WriterRole, account: address) {
@@ -133,7 +130,6 @@ module thrivecoin::reward_receipt {
       assert!(vector::length(&ids) == 1, 1);
 
       let writer: WriterRole = ts::take_shared(&ts);
-      assert!(writer.admin == ADMIN, 1);
 
       let admin_ref = ADMIN;
       assert!(vec_set::contains(&writer.list, &admin_ref), 1);
@@ -157,10 +153,8 @@ module thrivecoin::reward_receipt {
     // ensure that admin role belongs to ADMIN
     {
       ts::next_tx(&mut ts, ADMIN);
-      let writer: WriterRole = ts::take_shared(&ts);
       let role: AdminRole = ts::take_from_sender(&ts);
-      transfer_admin_role(role, &mut writer, new_owner);
-      ts::return_shared(writer);
+      transfer_admin_role(role, new_owner);
     };
 
     {
@@ -171,10 +165,6 @@ module thrivecoin::reward_receipt {
 
       let ids_new_owner = ts::ids_for_address<AdminRole>(new_owner);
       assert!(vector::length(&ids_new_owner) == 1, 1);
-
-      let writer: WriterRole = ts::take_shared(&ts);
-      assert!(writer.admin == new_owner, 1);
-      ts::return_shared(writer);
     };
 
     ts::end(ts);
@@ -204,7 +194,6 @@ module thrivecoin::reward_receipt {
     {
       ts::next_tx(&mut ts, ADMIN);
       let writer: WriterRole = ts::take_shared(&ts);
-      assert!(writer.admin == ADMIN, 1);
 
       let admin_ref = ADMIN;
       assert!(vec_set::contains(&writer.list, &admin_ref), 1);
@@ -240,7 +229,6 @@ module thrivecoin::reward_receipt {
     {
       ts::next_tx(&mut ts, ADMIN);
       let writer: WriterRole = ts::take_shared(&ts);
-      assert!(writer.admin == ADMIN, 1);
 
       let admin_ref = ADMIN;
       assert!(vec_set::contains(&writer.list, &admin_ref), 1);
@@ -263,7 +251,6 @@ module thrivecoin::reward_receipt {
     {
       ts::next_tx(&mut ts, ADMIN);
       let writer: WriterRole = ts::take_shared(&ts);
-      assert!(writer.admin == ADMIN, 1);
 
       let admin_ref = ADMIN;
       assert!(vec_set::contains(&writer.list, &admin_ref), 1);
@@ -292,7 +279,6 @@ module thrivecoin::reward_receipt {
       assert!(vector::length(&ids) == 1, 1);
 
       let writer: WriterRole = ts::take_shared(&ts);
-      assert!(writer.admin == ADMIN, 1);
 
       let admin_ref = ADMIN;
       assert!(vec_set::contains(&writer.list, &admin_ref), 1);
@@ -346,7 +332,6 @@ module thrivecoin::reward_receipt {
     {
       ts::next_tx(&mut ts, ADMIN);
       let writer: WriterRole = ts::take_shared(&ts);
-      assert!(writer.admin == ADMIN, 1);
 
       let admin_ref = ADMIN;
       assert!(vec_set::contains(&writer.list, &admin_ref), 1);
