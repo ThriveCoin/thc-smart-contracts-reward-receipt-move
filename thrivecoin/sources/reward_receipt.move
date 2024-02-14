@@ -5,7 +5,9 @@ module thrivecoin::reward_receipt {
   use sui::tx_context::{Self, TxContext};
   use sui::event;
   use sui::vec_set::{Self, VecSet};
-  use std::string::{String};
+  use std::string::{Self, String};
+  use sui::package;
+  use sui::display;
 
   // errors
   const ENotWriter: u64 = 1;
@@ -28,7 +30,7 @@ module thrivecoin::reward_receipt {
     timestamp: u64,
     meta_data_uri: String
   }
-    
+
   struct RewardReceiptStored has copy, drop {
     reward_receipt_id: ID,
     recipient: address,
@@ -38,8 +40,39 @@ module thrivecoin::reward_receipt {
     meta_data_uri: String
   }
 
+  // OTW
+  struct REWARD_RECEIPT has drop {}
+
   // initializer
-  fun init(ctx: &mut TxContext) {
+  fun init(otw: REWARD_RECEIPT, ctx: &mut TxContext) {
+    let publisher = package::claim(otw, ctx);
+
+    let display_keys = vector[
+      string::utf8(b"id"),
+      string::utf8(b"recipient"),
+      string::utf8(b"transfer_tx"),
+      string::utf8(b"version"),
+      string::utf8(b"timestamp"),
+      string::utf8(b"meta_data_uri"),
+    ];
+
+    let display_values = vector[
+      string::utf8(b"{id}"),
+      string::utf8(b"{recipient}"),
+      string::utf8(b"{transfer_tx}"),
+      string::utf8(b"{version}"),
+      string::utf8(b"{timestamp}"),
+      string::utf8(b"{meta_data_uri}"),
+    ];
+
+    let display = display::new_with_fields<RewardReceipt>(
+      &publisher, display_keys, display_values, ctx
+    );
+    display::update_version(&mut display);
+
+    transfer::public_transfer(publisher, tx_context::sender(ctx));
+    transfer::public_transfer(display, tx_context::sender(ctx));
+
     transfer::transfer(AdminRole {
       id: object::new(ctx)
     }, tx_context::sender(ctx));
@@ -111,16 +144,15 @@ module thrivecoin::reward_receipt {
 
   #[test_only] use std::vector;
 
-  #[test_only] use std::string::{Self};
-
   #[test_only] const ADMIN: address = @0xAD;
 
   #[test]
   fun test_module_init () {
     let ts = ts::begin(@0x0);
     {
+      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(ts::ctx(&mut ts));
+      init(otw, ts::ctx(&mut ts));
     };
 
     // ensure that admin role belongs to ADMIN
@@ -146,8 +178,9 @@ module thrivecoin::reward_receipt {
     let new_owner: address = @0xAD2;
 
     {
+      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(ts::ctx(&mut ts));
+      init(otw, ts::ctx(&mut ts));
     };
 
     // ensure that admin role belongs to ADMIN
@@ -176,8 +209,9 @@ module thrivecoin::reward_receipt {
     let writer_acc: address = @0xAD2;
 
     {
+      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(ts::ctx(&mut ts));
+      init(otw, ts::ctx(&mut ts));
     };
 
     {
@@ -211,8 +245,9 @@ module thrivecoin::reward_receipt {
     let writer_acc: address = @0xAD2;
 
     {
+      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(ts::ctx(&mut ts));
+      init(otw, ts::ctx(&mut ts));
     };
 
     {
@@ -269,8 +304,9 @@ module thrivecoin::reward_receipt {
     let non_writer = @0xAD2;
 
     {
+      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(ts::ctx(&mut ts));
+      init(otw, ts::ctx(&mut ts));
     };
 
     {
@@ -314,8 +350,9 @@ module thrivecoin::reward_receipt {
     let writer_acc: address = @0xAD2;
 
     {
+      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(ts::ctx(&mut ts));
+      init(otw, ts::ctx(&mut ts));
     };
 
     {
@@ -379,8 +416,9 @@ module thrivecoin::reward_receipt {
     let ts = ts::begin(@0x0);
 
     {
+      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(ts::ctx(&mut ts));
+      init(otw, ts::ctx(&mut ts));
     };
 
     {
