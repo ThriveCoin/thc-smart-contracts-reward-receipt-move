@@ -139,20 +139,46 @@ module thrivecoin::reward_receipt {
 
   public fun meta_data_uri(self: &RewardReceipt): String { self.meta_data_uri }
 
-  // unit tests
-  #[test_only] use sui::test_scenario as ts;
+  public fun writer_list(self: &WriterRole): VecSet<address> { self.list }
 
-  #[test_only] use std::vector;
+  #[test_only]
+  public fun test_init(ctx: &mut TxContext) {
+    init(REWARD_RECEIPT {}, ctx)
+  }
+}
 
-  #[test_only] const ADMIN: address = @0xAD;
+#[test_only]
+module thrivecoin::reward_receipt_test {
+  use thrivecoin::reward_receipt::{
+    ENotWriter,
+    AdminRole,
+    WriterRole,
+    RewardReceipt,
+    transfer_admin_role,
+    add_writer,
+    del_writer,
+    add_receipt,
+    recipient,
+    transfer_tx,
+    version,
+    timestamp,
+    meta_data_uri,
+    writer_list,
+    test_init
+  };
+  use sui::test_scenario as ts;
+  use sui::vec_set::{Self};
+  use std::string::{Self};
+  use std::vector;
+
+  const ADMIN: address = @0xAD;
 
   #[test]
   fun test_module_init () {
     let ts = ts::begin(@0x0);
     {
-      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(otw, ts::ctx(&mut ts));
+      test_init(ts::ctx(&mut ts));
     };
 
     // ensure that admin role belongs to ADMIN
@@ -164,8 +190,8 @@ module thrivecoin::reward_receipt {
       let writer: WriterRole = ts::take_shared(&ts);
 
       let admin_ref = ADMIN;
-      assert!(vec_set::contains(&writer.list, &admin_ref), 1);
-      assert!(vec_set::size(&writer.list) == 1, 1);
+      assert!(vec_set::contains(&writer_list(&writer), &admin_ref), 1);
+      assert!(vec_set::size(&writer_list(&writer)) == 1, 1);
       ts::return_shared(writer);
     };
 
@@ -178,9 +204,8 @@ module thrivecoin::reward_receipt {
     let new_owner: address = @0xAD2;
 
     {
-      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(otw, ts::ctx(&mut ts));
+      test_init(ts::ctx(&mut ts));
     };
 
     // ensure that admin role belongs to ADMIN
@@ -209,9 +234,8 @@ module thrivecoin::reward_receipt {
     let writer_acc: address = @0xAD2;
 
     {
-      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(otw, ts::ctx(&mut ts));
+      test_init(ts::ctx(&mut ts));
     };
 
     {
@@ -230,8 +254,8 @@ module thrivecoin::reward_receipt {
       let writer: WriterRole = ts::take_shared(&ts);
 
       let admin_ref = ADMIN;
-      assert!(vec_set::contains(&writer.list, &admin_ref), 1);
-      assert!(vec_set::contains(&writer.list, &writer_acc), 1);
+      assert!(vec_set::contains(&writer_list(&writer), &admin_ref), 1);
+      assert!(vec_set::contains(&writer_list(&writer), &writer_acc), 1);
 
       ts::return_shared(writer);
     };
@@ -245,9 +269,8 @@ module thrivecoin::reward_receipt {
     let writer_acc: address = @0xAD2;
 
     {
-      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(otw, ts::ctx(&mut ts));
+      test_init(ts::ctx(&mut ts));
     };
 
     {
@@ -266,8 +289,8 @@ module thrivecoin::reward_receipt {
       let writer: WriterRole = ts::take_shared(&ts);
 
       let admin_ref = ADMIN;
-      assert!(vec_set::contains(&writer.list, &admin_ref), 1);
-      assert!(vec_set::contains(&writer.list, &writer_acc), 1);
+      assert!(vec_set::contains(&writer_list(&writer), &admin_ref), 1);
+      assert!(vec_set::contains(&writer_list(&writer), &writer_acc), 1);
 
       ts::return_shared(writer);
     };
@@ -288,8 +311,8 @@ module thrivecoin::reward_receipt {
       let writer: WriterRole = ts::take_shared(&ts);
 
       let admin_ref = ADMIN;
-      assert!(vec_set::contains(&writer.list, &admin_ref), 1);
-      assert!(vec_set::contains(&writer.list, &writer_acc) == false, 1);
+      assert!(vec_set::contains(&writer_list(&writer), &admin_ref), 1);
+      assert!(vec_set::contains(&writer_list(&writer), &writer_acc) == false, 1);
 
       ts::return_shared(writer);
     };
@@ -304,9 +327,8 @@ module thrivecoin::reward_receipt {
     let non_writer = @0xAD2;
 
     {
-      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(otw, ts::ctx(&mut ts));
+      test_init(ts::ctx(&mut ts));
     };
 
     {
@@ -317,8 +339,8 @@ module thrivecoin::reward_receipt {
       let writer: WriterRole = ts::take_shared(&ts);
 
       let admin_ref = ADMIN;
-      assert!(vec_set::contains(&writer.list, &admin_ref), 1);
-      assert!(vec_set::size(&writer.list) == 1, 1);
+      assert!(vec_set::contains(&writer_list(&writer), &admin_ref), 1);
+      assert!(vec_set::size(&writer_list(&writer)) == 1, 1);
 
       ts::return_shared(writer);
     };
@@ -350,9 +372,8 @@ module thrivecoin::reward_receipt {
     let writer_acc: address = @0xAD2;
 
     {
-      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(otw, ts::ctx(&mut ts));
+      test_init(ts::ctx(&mut ts));
     };
 
     {
@@ -371,8 +392,8 @@ module thrivecoin::reward_receipt {
       let writer: WriterRole = ts::take_shared(&ts);
 
       let admin_ref = ADMIN;
-      assert!(vec_set::contains(&writer.list, &admin_ref), 1);
-      assert!(vec_set::contains(&writer.list, &writer_acc), 1);
+      assert!(vec_set::contains(&writer_list(&writer), &admin_ref), 1);
+      assert!(vec_set::contains(&writer_list(&writer), &writer_acc), 1);
 
       ts::return_shared(writer);
     };
@@ -399,11 +420,11 @@ module thrivecoin::reward_receipt {
       ts::next_tx(&mut ts, ADMIN);
       let receipt: RewardReceipt = ts::take_immutable(&ts);
 
-      assert!(receipt.recipient == @0xB1, 1);
-      assert!(receipt.transfer_tx == string::utf8(b"test receipt"), 1);
-      assert!(receipt.version == string::utf8(b"v1"), 1);
-      assert!(receipt.timestamp == 1706630649541, 1);
-      assert!(receipt.meta_data_uri == string::utf8(b"http://example.com/123"), 1);
+      assert!(recipient(&receipt) == @0xB1, 1);
+      assert!(transfer_tx(&receipt) == string::utf8(b"test receipt"), 1);
+      assert!(version(&receipt) == string::utf8(b"v1"), 1);
+      assert!(timestamp(&receipt) == 1706630649541, 1);
+      assert!(meta_data_uri(&receipt) == string::utf8(b"http://example.com/123"), 1);
 
       ts::return_immutable(receipt);
     };
@@ -416,9 +437,8 @@ module thrivecoin::reward_receipt {
     let ts = ts::begin(@0x0);
 
     {
-      let otw = REWARD_RECEIPT {};
       ts::next_tx(&mut ts, ADMIN);
-      init(otw, ts::ctx(&mut ts));
+      test_init(ts::ctx(&mut ts));
     };
 
     {
