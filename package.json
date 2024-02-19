@@ -1,0 +1,33 @@
+{
+  "name": "thc-smart-contracts-reward-receipt-move",
+  "description": "ThriveCoin reward receipt smart contracts for SUI network",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "lint:js": "standard --fix",
+    "build": "cd thrivecoin && sui move build",
+    "test": "cd thrivecoin && sui move test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThriveCoin/thc-smart-contracts-reward-receipt-move.git"
+  },
+  "keywords": [
+    "sui",
+    "thc",
+    "reward",
+    "receipt"
+  ],
+  "author": "thrivecoin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ThriveCoin/thc-smart-contracts-reward-receipt-move/issues"
+  },
+  "homepage": "https://github.com/ThriveCoin/thc-smart-contracts-reward-receipt-move#readme",
+  "devDependencies": {
+    "@mysten/sui.js": "^0.50.0",
+    "bech32": "^2.0.0",
+    "standard": "^17.1.0",
+    "yargs": "^17.7.2"
+  }
+}

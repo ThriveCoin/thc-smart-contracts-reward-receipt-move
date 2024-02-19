@@ -128,3 +128,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+thrivecoin/build
+.vscode
+
+package-lock.json
